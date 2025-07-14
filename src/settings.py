@@ -10,7 +10,7 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 
 # player
-PLAYER_SIZE = 30
+PLAYER_SIZE = 40
 PLAYER_SPEED = 5
 PLAYER_COLOR = WHITE # used for debugging and proto
 
