@@ -8,12 +8,12 @@ class Enemy1(BaseEnemy):
     def __init__(self, x, y):
         super().__init__(x, y)
         self.size = 35  # Adjust size as needed for your enemy1.png
-        self.speed = 3  # Slightly faster than base enemy
-        self.health = 100
+        self.speed = 2  # Slightly faster than base enemy
+        self.health = 50
         self.value = 15  # Worth more points than base enemy
 
         # Load and scale enemy image
-        self.image = AssetLoader.load_image('enemy1.png', self.size)
+        self.image = AssetLoader.load_image('enemy1.png', self.size, pixel_perfect=True)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y

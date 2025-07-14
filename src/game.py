@@ -1,5 +1,7 @@
 # Game loop & state manager
 import pygame
+
+from loader import AssetLoader
 from settings import *
 from enums import GameState
 from player.player import Player
@@ -13,6 +15,7 @@ from src.ui.game_over_screen import GameOverScreen
 class Game:
     def __init__(self):
         pygame.init()
+        pygame.mixer.init()
         self.screen = pygame.display.set_mode((WINDOW_W, WINDOW_H))
         pygame.display.set_caption(TITLE)
         self.clock = pygame.time.Clock()
@@ -27,6 +30,13 @@ class Game:
         self.player = Player(WINDOW_W // 2 - PLAYER_SIZE // 2, WINDOW_H // 2 - PLAYER_SIZE // 2)
         self.enemy_manager = EnemyManager()  # Add this line
 
+        self.laser_sound = AssetLoader.load_sound('laser_shoot.wav')
+        self.laser_sound.set_volume(0.4)
+        self.explosion_sound = AssetLoader.load_sound('laser_explosion.wav')
+        self.explosion_sound.set_volume(0.5)
+        AssetLoader.load_music('neon_hyperdrive.mp3')
+        AssetLoader.play_music(volume=1.5)
+
         self.game_over_screen = GameOverScreen()
         self.reset_game()
 
@@ -35,7 +45,7 @@ class Game:
         self.player = Player(WINDOW_W // 2 - PLAYER_SIZE // 2, WINDOW_H // 2 - PLAYER_SIZE // 2)
         self.enemy_manager = EnemyManager()
         self.score_manager.reset()
-
+        AssetLoader.play_music(volume=1.5)
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -46,9 +56,7 @@ class Game:
                     self.running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    if self.state == GameState.PLAYING:
-                        self.shoot_laser()
-                    elif self.state == GameState.GAME_OVER:
+                    if self.state == GameState.GAME_OVER:
                         # Check if retry button was clicked
                         if self.game_over_screen.handle_click(event.pos):
                             self.reset_game()
@@ -62,6 +70,8 @@ class Game:
             )
             self.player.lasers.append(laser)
             self.player.shoot_cooldown = FIRE_RATE
+            if self.laser_sound:
+                self.laser_sound.play()
 
     def update(self):
         if self.state == GameState.PLAYING:
@@ -69,6 +79,11 @@ class Game:
             keys = pygame.key.get_pressed()
             self.player.move(keys)
             self.player.aim(pygame.mouse.get_pos())
+
+            # auto shoot
+            if self.player.can_shoot:
+                self.shoot_laser()
+
             self.player.update()
 
             # Update enemy manager
@@ -80,12 +95,21 @@ class Game:
                 if laser.is_off_screen():
                     self.player.lasers.remove(laser)
 
+            for enemy in self.enemy_manager.enemies:
+                if hasattr(enemy, 'lasers'):
+                    for laser in enemy.lasers[:]:
+                        if self.player.rect.colliderect(laser.rect):
+                            self.state = GameState.GAME_OVER
+                            AssetLoader.stop_music()
+                            break
+
             # Check collisions and update score
             points = self.enemy_manager.check_collisions(self.player.lasers)
             self.score_manager.add_score(points)
 
             if self.player.check_collision(self.enemy_manager.enemies):
                 self.state = GameState.GAME_OVER
+                AssetLoader.stop_music()
 
     def draw(self):
         # Clear screen and draw background
@@ -127,5 +151,6 @@ class Game:
             self.draw()
             self.clock.tick(FPS)
 
+        AssetLoader.stop_music()
         pygame.quit()
 

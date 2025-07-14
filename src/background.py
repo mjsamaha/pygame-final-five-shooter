@@ -5,10 +5,10 @@ from loader import AssetLoader
 class Background:
     def __init__(self):
         # Load border images
-        self.top_border = AssetLoader.load_image('top-border.png')
-        self.bottom_border = AssetLoader.load_image('bottom-border.png')
-        self.left_border = AssetLoader.load_image('left-border.png')
-        self.right_border = AssetLoader.load_image('right-border.png')
+        self.top_border = AssetLoader.load_image('top-border.png', pixel_perfect=False)
+        self.bottom_border = AssetLoader.load_image('bottom-border.png', pixel_perfect=False)
+        self.left_border = AssetLoader.load_image('left-border.png', pixel_perfect=False)
+        self.right_border = AssetLoader.load_image('right-border.png', pixel_perfect=False)
 
         # Scale borders to fit window dimensions
         self.top_border = pygame.transform.scale(self.top_border, (WINDOW_W, BORDER_SIZE))

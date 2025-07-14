@@ -20,21 +20,25 @@ class Player:
         self.y = y
         self.size = PLAYER_SIZE
         self.speed = PLAYER_SPEED
+        self.target_angle = 0
+        self.aim_speed = AIM_SPEED # adjust
         self.angle = 0
 
         # Debug print to check asset loading
         print("Loading player image...")
-        self.original_image = AssetLoader.load_image('player.png', self.size)
+        self.original_image = AssetLoader.load_image('player.png', self.size, pixel_perfect=True)
         print(f"Image loaded: {self.original_image}")
 
-        self.image = self.original_image  # No rotation applied to the image
+        self.image = self.original_image
         self.rect = self.image.get_rect()
-        # Update rect position immediately
         self.rect.centerx = x + self.size // 2
         self.rect.centery = y + self.size // 2
         self.lasers = []
+
+        # Modified shooting variables
         self.can_shoot = True
         self.shoot_cooldown = 0
+        self.fire_rate = FIRE_RATE  # Make sure this constant is defined in settings.py
 
     def move(self, keys):
         if keys[pygame.K_w]:
@@ -53,9 +57,26 @@ class Player:
         self.rect.y = self.y
 
     def aim(self, mouse_pos):
+        # Calculate target angle based on mouse position
         dx = mouse_pos[0] - (self.x + self.size / 2)
         dy = mouse_pos[1] - (self.y + self.size / 2)
-        self.angle = math.degrees(math.atan2(-dy, dx))
+        self.target_angle = math.degrees(math.atan2(-dy, dx))
+
+        # Calculate the shortest rotation direction
+        diff = self.target_angle - self.angle
+
+        # Normalize the difference to [-180, 180]
+        if diff > 180:
+            diff -= 360
+        elif diff < -180:
+            diff += 360
+
+        # Smoothly interpolate the current angle towards the target
+        self.angle += diff * self.aim_speed
+
+        # Normalize the current angle to [0, 360]
+        self.angle = self.angle % 360
+
         # Keep the rotation centered
         self.rect = self.image.get_rect(center=(self.x + self.size // 2, self.y + self.size // 2))
 

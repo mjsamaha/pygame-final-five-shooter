@@ -11,9 +11,10 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 
 # player
-PLAYER_SIZE = 40
+PLAYER_SIZE = 35
 PLAYER_SPEED = 5
 PLAYER_COLOR = WHITE # used for debugging and proto
+AIM_SPEED = 0.5
 
 FIRE_RATE = 20
 
