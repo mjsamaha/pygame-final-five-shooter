@@ -1,0 +1,19 @@
+scale: 16x16
+bg: transparent
+ext: .png
+
+player.png
+laser.png
+
+5x diff enemy
+naming: enemy1.png, .etc
+
+=========================
+
+Audio.....
+bg-music.wav
+level_completion.wav
+shoot.wav
+enemy_explode.wav
+player_death.wav
+game_end.wav
