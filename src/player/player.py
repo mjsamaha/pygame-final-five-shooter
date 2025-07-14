@@ -33,8 +33,8 @@ class Player:
         self.rect.centerx = x + self.size // 2
         self.rect.centery = y + self.size // 2
         self.lasers = []
+        self.can_shoot = True
         self.shoot_cooldown = 0
-
 
     def move(self, keys):
         if keys[pygame.K_w]:
@@ -46,9 +46,9 @@ class Player:
         if keys[pygame.K_d]:
             self.x += self.speed
 
-        # Keep player in bounds
-        self.x = max(0, min(self.x, WINDOW_W - self.size))
-        self.y = max(0, min(self.y, WINDOW_H - self.size))
+        # Keep player in bounds, accounting for borders
+        self.x = max(BORDER_SIZE, min(self.x, WINDOW_W - BORDER_SIZE - self.size))
+        self.y = max(BORDER_SIZE, min(self.y, WINDOW_H - BORDER_SIZE - self.size))
         self.rect.x = self.x
         self.rect.y = self.y
 
@@ -78,6 +78,16 @@ class Player:
         # )
         # pygame.draw.line(screen, WHITE, center, end_pos, 2)
 
+    def check_collision(self, enemies):
+        for enemy in enemies:
+            if self.rect.colliderect(enemy.rect):
+                return True
+
+        return False
+
     def update(self):
             if self.shoot_cooldown > 0:
                 self.shoot_cooldown -= 1
+                self.can_shoot = False
+            else:
+                self.can_shoot = True

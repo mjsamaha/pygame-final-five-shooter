@@ -10,7 +10,7 @@ class EnemyManager:
         self.spawn_timer = 0
         self.spawn_delay = 60  # Frames between spawns
         self.wave_number = 1
-        self.enemies_per_wave = 5
+        self.enemies_per_wave = 15
         self.enemies_spawned = 0
 
     def update(self, player_x, player_y):
@@ -35,18 +35,20 @@ class EnemyManager:
         """Spawn enemy at a random edge position"""
         # Random edge selection
         side = random.randint(0, 3)
+        spawn_offset = 20  # How far outside the visible area enemies spawn
+
         if side == 0:  # Top
-            x = random.randint(0, WINDOW_W)
-            y = -20
+            x = random.randint(BORDER_SIZE, WINDOW_W - BORDER_SIZE)
+            y = -spawn_offset
         elif side == 1:  # Right
-            x = WINDOW_W + 20
-            y = random.randint(0, WINDOW_H)
+            x = WINDOW_W + spawn_offset
+            y = random.randint(BORDER_SIZE, WINDOW_H - BORDER_SIZE)
         elif side == 2:  # Bottom
-            x = random.randint(0, WINDOW_W)
-            y = WINDOW_H + 20
+            x = random.randint(BORDER_SIZE, WINDOW_W - BORDER_SIZE)
+            y = WINDOW_H + spawn_offset
         else:  # Left
-            x = -20
-            y = random.randint(0, WINDOW_H)
+            x = -spawn_offset
+            y = random.randint(BORDER_SIZE, WINDOW_H - BORDER_SIZE)
 
         self.enemies.append(Enemy1(x, y))
 

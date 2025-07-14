@@ -18,7 +18,7 @@ class Laser:
         self.x = x
         self.y = y
         self.angle = angle
-        self.speed = 10
+        self.speed = 15
         self.size = 15
 
         # Load and rotate laser image
@@ -40,5 +40,8 @@ class Laser:
         screen.blit(self.image, self.rect)
 
     def is_off_screen(self):
-        return (self.x < -self.size or self.x > WINDOW_W + self.size or
-                self.y < -self.size or self.y > WINDOW_H + self.size)
+        margin = self.size  # How far past the border before we remove the laser
+        return (self.x < BORDER_SIZE - margin or
+                self.x > WINDOW_W - BORDER_SIZE + margin or
+                self.y < BORDER_SIZE - margin or
+                self.y > WINDOW_H - BORDER_SIZE + margin)

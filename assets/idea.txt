@@ -8,6 +8,9 @@ laser.png
 5x diff enemy
 naming: enemy1.png, .etc
 
+explosions
+enemy1_explosion.png. etc..
+
 =========================
 
 Audio.....
@@ -16,4 +19,3 @@ level_completion.wav
 shoot.wav
 enemy_explode.wav
 player_death.wav
-game_end.wav

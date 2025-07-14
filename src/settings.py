@@ -3,6 +3,7 @@ WINDOW_W = 800
 WINDOW_H = 600
 FPS = 60
 TITLE = "Square Shooter Demo"
+BORDER_SIZE = 32
 
 # colors (RGB)
 BLACK = (0, 0, 0)
@@ -13,6 +14,8 @@ RED = (255, 0, 0)
 PLAYER_SIZE = 40
 PLAYER_SPEED = 5
 PLAYER_COLOR = WHITE # used for debugging and proto
+
+FIRE_RATE = 20
 
 # game
 MENU = "MENU"
