@@ -1,1 +1,2 @@
 # pygame-final-five-shooter
+My try on creating a 2D arcade-style, top-down shooter built using Python and Pygame. Control a square-shaped ship, navigating a void using the keyboard, aiming with the mouse, and shooting projectiles. The game introduces a five-level base with increasing difficulty. Each stage introduces a new enemy type, and rewards the player with a new combat upgrade upon level completion.
