@@ -117,3 +117,6 @@ class EnemyManager:
         self.enemies_spawned = 0
         self.enemies_per_wave = 5 + (self.wave_number * 2)
         self.spawn_delay = max(30, 60 - (self.wave_number * 3))
+
+        # Signal that it's time for an upgrade
+        return self.wave_number <= 5

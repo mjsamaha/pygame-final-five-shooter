@@ -11,6 +11,9 @@ from src.ui.hud import HUD
 from src.score_manager import ScoreManager
 from src.background import Background
 from src.ui.game_over_screen import GameOverScreen
+from ui.upgrade_screen import UpgradeScreen
+from upgrade_manager import UpgradeManager
+
 
 class Game:
     def __init__(self):
@@ -31,11 +34,15 @@ class Game:
         self.enemy_manager = EnemyManager()  # Add this line
 
         self.laser_sound = AssetLoader.load_sound('laser_shoot.wav')
-        self.laser_sound.set_volume(0.4)
+        self.laser_sound.set_volume(0.2)
         self.explosion_sound = AssetLoader.load_sound('laser_explosion.wav')
-        self.explosion_sound.set_volume(0.5)
+        self.explosion_sound.set_volume(0.3)
         AssetLoader.load_music('neon_hyperdrive.mp3')
-        AssetLoader.play_music(volume=1.5)
+        AssetLoader.play_music(volume=1.4)
+
+        self.upgrade_manager = UpgradeManager()
+        self.upgrade_screen = UpgradeScreen()
+        self.current_upgrade_options = None
 
         self.game_over_screen = GameOverScreen()
         self.reset_game()
@@ -45,6 +52,8 @@ class Game:
         self.player = Player(WINDOW_W // 2 - PLAYER_SIZE // 2, WINDOW_H // 2 - PLAYER_SIZE // 2)
         self.enemy_manager = EnemyManager()
         self.score_manager.reset()
+        self.upgrade_manager = UpgradeManager()
+        self.current_upgrade_options = None
         AssetLoader.play_music(volume=1.5)
 
     def handle_events(self):
@@ -56,20 +65,41 @@ class Game:
                     self.running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    if self.state == GameState.GAME_OVER:
-                        # Check if retry button was clicked
+                    if self.state == GameState.UPGRADE:
+                        choice = self.upgrade_screen.handle_click(event.pos)
+                        if choice is not None:
+                            upgrade_type = self.current_upgrade_options[choice][0]
+                            self.upgrade_manager.apply_upgrade(self.player, upgrade_type)
+                            self.state = GameState.PLAYING
+                    elif self.state == GameState.GAME_OVER:
                         if self.game_over_screen.handle_click(event.pos):
                             self.reset_game()
 
     def shoot_laser(self):
-        if self.player.can_shoot:  # Only shoot if cooldown is done
-            laser = Laser(
-                self.player.x + self.player.size / 2,
-                self.player.y + self.player.size / 2,
-                self.player.angle
-            )
-            self.player.lasers.append(laser)
-            self.player.shoot_cooldown = FIRE_RATE
+        if self.player.can_shoot:
+            if self.player.shot_count > 1:
+                # Calculate spread angles
+                base_angle = self.player.angle
+                half_spread = (self.player.shot_count - 1) * self.player.shot_spread / 2
+
+                for i in range(self.player.shot_count):
+                    angle = base_angle - half_spread + (i * self.player.shot_spread)
+                    laser = Laser(
+                        self.player.x + self.player.size / 2,
+                        self.player.y + self.player.size / 2,
+                        angle
+                    )
+                    self.player.lasers.append(laser)
+            else:
+                # Original single shot code
+                laser = Laser(
+                    self.player.x + self.player.size / 2,
+                    self.player.y + self.player.size / 2,
+                    self.player.angle
+                )
+                self.player.lasers.append(laser)
+
+            self.player.shoot_cooldown = self.player.fire_rate
             if self.laser_sound:
                 self.laser_sound.play()
 
@@ -107,16 +137,24 @@ class Game:
             points = self.enemy_manager.check_collisions(self.player.lasers)
             self.score_manager.add_score(points)
 
+            # Check if wave is complete and show upgrade screen
+            if (len(self.enemy_manager.enemies) == 0 and
+                    self.enemy_manager.enemies_spawned >= self.enemy_manager.enemies_per_wave):
+                if self.enemy_manager.wave_number < 5:
+                    self.current_upgrade_options = self.upgrade_manager.get_upgrade_options(
+                        self.enemy_manager.wave_number)
+                    if self.current_upgrade_options:
+                        self.state = GameState.UPGRADE
+
             if self.player.check_collision(self.enemy_manager.enemies):
                 self.state = GameState.GAME_OVER
                 AssetLoader.stop_music()
 
     def draw(self):
-        # Clear screen and draw background
         self.screen.fill(BLACK)
         self.background.draw(self.screen)
 
-        if self.state == GameState.PLAYING:
+        if self.state == GameState.PLAYING or self.state == GameState.UPGRADE:
             # Draw game elements
             self.player.draw(self.screen)
             self.enemy_manager.draw(self.screen)
@@ -133,15 +171,18 @@ class Game:
                 self.enemy_manager.wave_number,
                 enemies_remaining
             )
+
+            # Draw upgrade screen if in upgrade state
+            if self.state == GameState.UPGRADE:
+                self.upgrade_screen.draw(self.screen, self.current_upgrade_options)
+
         elif self.state == GameState.GAME_OVER:
-            # Draw game over screen
             self.game_over_screen.draw(
                 self.screen,
                 self.score_manager.score,
                 self.score_manager.high_score
             )
 
-        # Update display
         pygame.display.flip()
 
     def run(self):
