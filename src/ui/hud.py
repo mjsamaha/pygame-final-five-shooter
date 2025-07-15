@@ -1,7 +1,7 @@
 # continuously displays score, curr level, remaining enemies, indicators..
 
 import pygame
-from settings import *
+from config.settings import *
 
 
 # TODO: upgrade visual hud

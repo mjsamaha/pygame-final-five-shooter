@@ -1,1 +1,0 @@
-# UpgradeSys manager

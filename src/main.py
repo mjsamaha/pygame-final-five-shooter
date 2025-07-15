@@ -1,5 +1,5 @@
 # entry point
-from game import Game
+from core.game import Game
 
 def main():
     game = Game()
