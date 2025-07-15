@@ -51,7 +51,7 @@ class Game:
         self.laser_sound.set_volume(0.2)
         self.explosion_sound = AssetLoader.load_sound('laser_explosion.wav')
         self.explosion_sound.set_volume(0.5)
-        AssetLoader.load_music('neon_hyperdrive.mp3')
+        AssetLoader.load_music('DSSongRager.mp3')
         AssetLoader.play_music(volume=1.0)
 
         self.upgrade_manager = UpgradeManager()
@@ -93,7 +93,7 @@ class Game:
                         self.state = GameState.PLAYING
                         # Stop menu music and start game music
                         AssetLoader.stop_music()
-                        AssetLoader.load_music('neon_hyperdrive.mp3')
+                        AssetLoader.load_music('DSSongRager.mp3')
                         AssetLoader.play_music(volume=1.0)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
