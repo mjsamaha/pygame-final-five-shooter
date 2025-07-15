@@ -14,13 +14,14 @@ class GameStateManager:
             volume=GAME_CONFIG['audio']['music']['menu']['volume']
         )
 
-    def switch_to_playing(self):
+    def switch_to_playing(self, restart_music=True):
         self.state = GameState.PLAYING
-        AssetLoader.stop_music()
-        AssetLoader.load_music(GAME_CONFIG['audio']['music']['game']['path'])
-        AssetLoader.play_music(
-            volume=GAME_CONFIG['audio']['music']['game']['volume']
-        )
+        if restart_music:
+            AssetLoader.stop_music()
+            AssetLoader.load_music(GAME_CONFIG['audio']['music']['game']['path'])
+            AssetLoader.play_music(
+                volume=GAME_CONFIG['audio']['music']['game']['volume']
+            )
 
     def switch_to_upgrade(self):
         self.state = GameState.UPGRADE

@@ -1,0 +1,6 @@
+[build]
+directory = "SquareShooter-Windows"
+[package]
+name = "square-shooter"
+version = "1.0.0"
+authors = ["Your Name"]

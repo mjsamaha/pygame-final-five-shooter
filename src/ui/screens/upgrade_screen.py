@@ -1,49 +1,88 @@
+import math
+
 import pygame
 from config.settings import *
+from ui.screens.main_menu_screen import Button  # Reuse the Button class
 
 
 class UpgradeScreen:
     def __init__(self):
-        self.font_large = pygame.font.Font(None, 64)
-        self.font_medium = pygame.font.Font(None, 48)
-        self.font_small = pygame.font.Font(None, 32)
+        self.font_large = pygame.font.Font(None, UI_SIZES['title'])
+        self.font_medium = pygame.font.Font(None, UI_SIZES['subtitle'])
+        self.font_small = pygame.font.Font(None, UI_SIZES['text'])
 
-        # Upgrade option buttons
-        button_w, button_h = 300, 100
-        spacing = 50
-        self.button1_rect = pygame.Rect(WINDOW_W // 2 - button_w - spacing // 2,
-                                        WINDOW_H // 2 - button_h // 2,
-                                        button_w, button_h)
-        self.button2_rect = pygame.Rect(WINDOW_W // 2 + spacing // 2,
-                                        WINDOW_H // 2 - button_h // 2,
-                                        button_w, button_h)
+        # Create title with shadow effect
+        self.title = self.font_large.render("Choose Your Upgrade!", True, UI_COLORS['primary'])
+        self.title_shadow = self.font_large.render("Choose Your Upgrade!", True, UI_COLORS['secondary'])
+
+        # Position title
+        self.title_rect = self.title.get_rect(center=(WINDOW_W // 2, WINDOW_H // 4))
+        self.title_shadow_rect = self.title_rect.copy()
+        self.title_shadow_rect.x += 2
+        self.title_shadow_rect.y += 2
+
+        # Create upgrade buttons
+        button_w, button_h = 320, 120  # Larger buttons
+        spacing = 60
+
+        self.button1 = Button(
+            "",  # Text will be set dynamically
+            button_w,
+            button_h,
+            (WINDOW_W // 2 - button_w - spacing // 2, WINDOW_H // 2 - button_h // 2),
+            font_size=UI_SIZES['subtitle']
+        )
+
+        self.button2 = Button(
+            "",  # Text will be set dynamically
+            button_w,
+            button_h,
+            (WINDOW_W // 2 + spacing // 2, WINDOW_H // 2 - button_h // 2),
+            font_size=UI_SIZES['subtitle']
+        )
+
+        # Animation
+        self.title_offset = 0
+        self.animation_speed = 0.3
 
     def draw(self, screen, upgrade_options):
-        # Draw title
-        title = self.font_large.render("Choose Your Upgrade!", True, WHITE)
-        title_rect = title.get_rect(center=(WINDOW_W // 2, WINDOW_H // 4))
-        screen.blit(title, title_rect)
+        # Draw background
+        screen.fill(UI_COLORS['background'])
+
+        # Animate title
+        self.title_offset = (self.title_offset + self.animation_speed) % 360
+        offset_y = math.sin(math.radians(self.title_offset)) * 6
+
+        # Draw title with shadow
+        screen.blit(self.title_shadow,
+                    (self.title_shadow_rect.x, self.title_shadow_rect.y + offset_y))
+        screen.blit(self.title,
+                    (self.title_rect.x, self.title_rect.y + offset_y))
 
         # Draw upgrade buttons
         for i, (upgrade, desc) in enumerate(upgrade_options):
-            button_rect = self.button1_rect if i == 0 else self.button2_rect
+            button = self.button1 if i == 0 else self.button2
 
-            # Draw button background
-            pygame.draw.rect(screen, WHITE, button_rect, 2)
+            # Update button text
+            button.text_surf = self.font_medium.render(
+                upgrade.value.replace("_", " "), True, UI_COLORS['text'])
+            button.text_rect = button.text_surf.get_rect(
+                center=(button.top_rect.centerx, button.top_rect.centery - 15))
 
-            # Draw upgrade name
-            name_text = self.font_medium.render(upgrade.value.replace("_", " "), True, WHITE)
-            name_rect = name_text.get_rect(center=(button_rect.centerx, button_rect.centery - 15))
-            screen.blit(name_text, name_rect)
+            # Draw description below button
+            desc_text = self.font_small.render(desc, True, UI_COLORS['text_secondary'])
+            desc_rect = desc_text.get_rect(
+                center=(button.top_rect.centerx, button.top_rect.bottom + 20))
 
-            # Draw description
-            desc_text = self.font_small.render(desc, True, WHITE)
-            desc_rect = desc_text.get_rect(center=(button_rect.centerx, button_rect.centery + 15))
+            # Draw button and description
+            button.hover(pygame.mouse.get_pos())
+            button.draw(screen)
             screen.blit(desc_text, desc_rect)
 
     def handle_click(self, pos):
-        if self.button1_rect.collidepoint(pos):
+        if self.button1.check_click(pos):
             return 0
-        elif self.button2_rect.collidepoint(pos):
+        elif self.button2.check_click(pos):
             return 1
         return None
+

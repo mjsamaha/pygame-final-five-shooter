@@ -3,6 +3,11 @@ A fast-paced, arcade-style top-down shooter built with Python and Pygame where y
 
 ## Game Features
 
+> Main Menu Screenshot
+![img.png](img.png)
+
+> Gameplay Screenshot
+
 ### Core Gameplay
 - **Movement**: WASD keys for precise ship control
 - **Aiming**: Mouse-based aiming system with smooth rotation

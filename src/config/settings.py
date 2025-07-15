@@ -1,3 +1,31 @@
+UI_COLORS = {
+    'primary': (220, 220, 220),    # Soft white
+    'secondary': (128, 128, 128),   # Medium gray
+    'accent': (255, 165, 0),       # Golden accent
+    'background': (15, 15, 15),    # Rich black
+    'text': (255, 255, 255),       # Pure white
+    'text_secondary': (170, 170, 170), # Light gray
+    'button': {
+        'normal': (30, 30, 30),    # Dark gray
+        'hover': (45, 45, 45),     # Slightly lighter gray
+        'pressed': (20, 20, 20),   # Darker gray
+        'border': (50, 50, 50),    # Button border color
+    }
+}
+
+UI_SIZES = {
+    'title': 82,          # Larger title
+    'subtitle': 36,
+    'text': 24,
+    'button': {
+        'width': 220,     # Slightly wider button
+        'height': 60,     # Taller button
+        'padding': 20,
+        'border_radius': 8, # Subtle rounded corners
+        'border_width': 2,  # Border thickness
+    }
+}
+
 # Game constants
 WINDOW_W = 800
 WINDOW_H = 600

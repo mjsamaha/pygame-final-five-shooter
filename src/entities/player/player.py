@@ -110,9 +110,6 @@ class Player:
             self.lasers.append(laser)
 
     def draw(self, screen):
-        # Debug prints
-        print(f"Player rect: {self.rect}")
-        print(f"Player position: ({self.x}, {self.y})")
 
         # Draw rotated player image
         screen.blit(self.image, self.rect)

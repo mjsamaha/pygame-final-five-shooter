@@ -50,13 +50,12 @@ class Game:
         self.running = True
 
     def _set_window_icon(self):
-        """Set the window icon with error handling"""
         try:
             icon = AssetLoader.load_image(GAME_CONFIG['window']['icon_path'])
             if icon:
                 pygame.display.set_icon(icon)
-        except Exception as e:
-            print(f"Error setting game icon: {e}")
+        except Exception:
+            pass
 
     def _init_game_components(self):
         """Initialize game components and managers"""
@@ -256,10 +255,12 @@ class Game:
                             self.reset_game()
                             self.state_manager.switch_to_playing()
                     elif self.state_manager.state == GameState.UPGRADE:
-                        selected_upgrade = self.upgrade_screen.handle_click(event.pos)
-                        if selected_upgrade:
+                        selected_index = self.upgrade_screen.handle_click(event.pos)
+                        if selected_index is not None:
+                            # Get the actual upgrade type from current_upgrade_options
+                            selected_upgrade = self.current_upgrade_options[selected_index][0]
                             self.upgrade_manager.apply_upgrade(self.player, selected_upgrade)
-                            self.state_manager.switch_to_playing()
+                            self.state_manager.switch_to_playing(restart_music=False)
                             self.enemy_manager.start_new_wave()
 
     def run(self):
