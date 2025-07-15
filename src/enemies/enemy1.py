@@ -11,6 +11,8 @@ class Enemy1(BaseEnemy):
         self.speed = 2  # Slightly faster than base enemy
         self.health = 50
         self.value = 15  # Worth more points than base enemy
+        self.explosion_color = (255, 0, 0)  # Red explosion
+
 
         # Load and scale enemy image
         self.image = AssetLoader.load_image('enemy1.png', self.size, pixel_perfect=True)

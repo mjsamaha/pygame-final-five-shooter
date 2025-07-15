@@ -4,11 +4,12 @@ from loader import AssetLoader
 
 
 class EnemyLaser:
-    def __init__(self, x, y, target_x, target_y, speed=8):
+    def __init__(self, x, y, target_x, target_y, color=(255, 0, 0), speed=8):
         self.x = x
         self.y = y
         self.speed = speed
         self.size = 15
+        self.color = color
 
         # Calculate direction
         dx = target_x - x

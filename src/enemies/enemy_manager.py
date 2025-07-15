@@ -19,6 +19,7 @@ class EnemyManager:
         self.enemies_spawned = 0
         self.explosion_sound = AssetLoader.load_sound('laser_explosion.wav')
 
+        self.particle_system = None
         # Enemy type weights for different waves
         self.enemy_weights = {
             1: [(Enemy1, 100)],
@@ -72,26 +73,48 @@ class EnemyManager:
             y = random.randint(BORDER_SIZE, WINDOW_H - BORDER_SIZE)
 
         enemy_type = self.get_enemy_type()
-        self.enemies.append(enemy_type(x, y))
+        enemy = enemy_type(x, y)
+        if hasattr(enemy, 'particle_system'):
+            enemy.particle_system = self.particle_system
+        self.enemies.append(enemy)
+
 
     def check_collisions(self, player_lasers):
-        """Check collisions between enemies and lasers"""
-        score = 0
+            """Check collisions between enemies and lasers"""
+            score = 0
 
-        # Check player lasers with enemies
-        for laser in player_lasers[:]:
-            for enemy in self.enemies[:]:
-                if enemy.rect.colliderect(laser.x - laser.size, laser.y - laser.size,
-                                          laser.size * 2, laser.size * 2):
-                    if enemy.take_damage(34):
-                        score += enemy.value
-                        self.enemies.remove(enemy)
-                        if self.explosion_sound:
-                            self.explosion_sound.play()
-                    player_lasers.remove(laser)
-                    break
+            # Check player lasers with enemies
+            for laser in player_lasers[:]:
+                for enemy in self.enemies[:]:
+                    if enemy.rect.colliderect(laser.x - laser.size, laser.y - laser.size,
+                                              laser.size * 2, laser.size * 2):
+                        if enemy.take_damage(34):
+                            score += enemy.value
+                            # Create explosion particles with more dramatic effects
+                            if self.particle_system:
+                                # Create main explosion
+                                self.particle_system.create_explosion(
+                                    enemy.x + enemy.size / 2,
+                                    enemy.y + enemy.size / 2,
+                                    color=enemy.explosion_color,  # Orange explosion
+                                    count=40  # More particles
+                                )
+                                # Create secondary explosion with different color
+                                lighter_color = tuple(min(255, c + 50) for c in enemy.explosion_color)
+                                self.particle_system.create_explosion(
+                                    enemy.x + enemy.size / 2,
+                                    enemy.y + enemy.size / 2,
+                                    color=lighter_color,
+                                    count=20  # Fewer particles for secondary explosion
+                                )
 
-        return score
+                            self.enemies.remove(enemy)
+                            if self.explosion_sound:
+                                self.explosion_sound.play()
+                        player_lasers.remove(laser)
+                        break
+
+            return score
 
     def update(self, player_x, player_y):
         # Update spawn timer

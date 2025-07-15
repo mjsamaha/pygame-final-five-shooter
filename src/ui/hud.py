@@ -3,6 +3,10 @@
 import pygame
 from settings import *
 
+
+# TODO: upgrade visual hud
+# TODO: pixel art HUD components?
+
 class HUD:
     def __init__(self):
         self.font = pygame.font.Font(None, 36)  # Default Pygame font, size 36

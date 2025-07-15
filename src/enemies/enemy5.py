@@ -12,6 +12,7 @@ class Enemy5(BaseEnemy):
         self.speed = 5
         self.health = 200
         self.value = 75
+        self.explosion_color = (0, 218, 255)  # Red explosion
 
         self.image = AssetLoader.load_image('enemy5.png', self.size, pixel_perfect=True)
         self.rect = self.image.get_rect()
@@ -23,9 +24,6 @@ class Enemy5(BaseEnemy):
         self.shoot_delay = 180
         self.lasers = []
 
-        # TODO: enemy laser sound
-
-
     def update(self, player_x, player_y):
         super().update(player_x, player_y)
 
@@ -35,10 +33,18 @@ class Enemy5(BaseEnemy):
         else:
             self.shoot_cooldown -= 1
 
-        for laser in self.lasers[:]:
-            laser.move()
-            if laser.is_off_screen():
-                self.lasers.remove(laser)
+            # Update lasers
+            for laser in self.lasers[:]:
+                laser.move()
+                # Create particle trail if particle system exists
+                if hasattr(self, 'particle_system') and self.particle_system:
+                    self.particle_system.create_enemy_laser_trail(
+                        laser.x,
+                        laser.y,
+                        laser.color
+                    )
+                if laser.is_off_screen():
+                    self.lasers.remove(laser)
 
     def shoot_spread(self, player_x, player_y):
         # Shoot 3 lasers in a spread pattern

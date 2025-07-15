@@ -11,6 +11,7 @@ class Enemy4(BaseEnemy):
         self.speed = 4
         self.health = 150
         self.value = 45
+        self.explosion_color = (255, 11, 234)  # Red explosion
 
         self.image = AssetLoader.load_image('enemy4.png', self.size, pixel_perfect=True)
         self.rect = self.image.get_rect()

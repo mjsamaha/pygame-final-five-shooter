@@ -2,6 +2,9 @@
 import pygame
 from settings import *
 
+# TODO: upgrade visual game over screen
+
+
 class GameOverScreen:
     def __init__(self):
         self.font_large = pygame.font.Font(None, 74)

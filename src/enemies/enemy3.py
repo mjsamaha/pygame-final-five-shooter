@@ -12,6 +12,7 @@ class Enemy3(BaseEnemy):
         self.speed = 3.5  # Slower but shoots
         self.health = 100
         self.value = 35
+        self.explosion_color = (249, 255, 0)  # Red explosion
 
         self.image = AssetLoader.load_image('enemy3.png', self.size, pixel_perfect=True)
         self.rect = self.image.get_rect()
@@ -22,7 +23,6 @@ class Enemy3(BaseEnemy):
         self.shoot_delay = 120  # Frames between shots
         self.lasers = []
 
-        # TODO: enemy laser sound
 
 
     def update(self, player_x, player_y):
@@ -35,18 +35,28 @@ class Enemy3(BaseEnemy):
         else:
             self.shoot_cooldown -= 1
 
-        # Update lasers
-        for laser in self.lasers[:]:
-            laser.move()
-            if laser.is_off_screen():
-                self.lasers.remove(laser)
+            # Update lasers
+            for laser in self.lasers[:]:
+                laser.move()
+                # Create particle trail if particle system exists
+                if hasattr(self, 'particle_system') and self.particle_system:
+                    self.particle_system.create_enemy_laser_trail(
+                        laser.x,
+                        laser.y,
+                        laser.color
+                    )
+                if laser.is_off_screen():
+                    self.lasers.remove(laser)
 
     def shoot(self, player_x, player_y):
-        laser = EnemyLaser(self.x + self.size / 2, self.y + self.size / 2,
-                           player_x, player_y)
+        laser = EnemyLaser(
+            self.x + self.size / 2,
+            self.y + self.size / 2,
+            player_x,
+            player_y,
+            color=self.explosion_color  # Use the same color as explosions
+        )
         self.lasers.append(laser)
-        # TODO: if self.laser_sound:
-            # self.laser_sound.play()
 
     def draw(self, screen):
         # Update rect position

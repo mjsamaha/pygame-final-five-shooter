@@ -23,6 +23,7 @@ class BaseEnemy:
         self.rect = pygame.Rect(x, y, self.size, self.size)
         self.health = 100  # Base health, can be overridden
         self.value = 10  # Score value when destroyed
+        self.explosion_color = (255, 200, 0)  # Default explosion color
 
     def move(self, player_x, player_y):
         """Base movement behavior - straight line towards player"""

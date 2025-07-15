@@ -1,4 +1,6 @@
 # Game loop & state manager
+import random
+
 import pygame
 
 from loader import AssetLoader
@@ -13,6 +15,7 @@ from src.background import Background
 from src.ui.game_over_screen import GameOverScreen
 from ui.upgrade_screen import UpgradeScreen
 from upgrade_manager import UpgradeManager
+from src.particles import ParticleSystem
 
 
 class Game:
@@ -21,6 +24,16 @@ class Game:
         pygame.mixer.init()
         self.screen = pygame.display.set_mode((WINDOW_W, WINDOW_H))
         pygame.display.set_caption(TITLE)
+        # Set window icon with error checking
+        try:
+            icon = AssetLoader.load_image('icon.png')  # Don't force size for icon
+            if icon:
+                pygame.display.set_icon(icon)
+            else:
+                print("Failed to load icon.png")
+        except Exception as e:
+            print(f"Error setting game icon: {e}")
+
         self.clock = pygame.time.Clock()
         self.running = True
         self.state = GameState.PLAYING
@@ -36,13 +49,16 @@ class Game:
         self.laser_sound = AssetLoader.load_sound('laser_shoot.wav')
         self.laser_sound.set_volume(0.2)
         self.explosion_sound = AssetLoader.load_sound('laser_explosion.wav')
-        self.explosion_sound.set_volume(0.3)
+        self.explosion_sound.set_volume(0.5)
         AssetLoader.load_music('neon_hyperdrive.mp3')
-        AssetLoader.play_music(volume=1.4)
+        AssetLoader.play_music(volume=1.0)
 
         self.upgrade_manager = UpgradeManager()
         self.upgrade_screen = UpgradeScreen()
         self.current_upgrade_options = None
+
+        self.particle_system = ParticleSystem()
+        self.enemy_manager.particle_system = self.particle_system
 
         self.game_over_screen = GameOverScreen()
         self.reset_game()
@@ -51,29 +67,30 @@ class Game:
         self.state = GameState.PLAYING
         self.player = Player(WINDOW_W // 2 - PLAYER_SIZE // 2, WINDOW_H // 2 - PLAYER_SIZE // 2)
         self.enemy_manager = EnemyManager()
+        self.enemy_manager.particle_system = self.particle_system  # Add this line
         self.score_manager.reset()
         self.upgrade_manager = UpgradeManager()
         self.current_upgrade_options = None
         AssetLoader.play_music(volume=1.5)
 
     def handle_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.running = False
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
                     self.running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    if self.state == GameState.UPGRADE:
-                        choice = self.upgrade_screen.handle_click(event.pos)
-                        if choice is not None:
-                            upgrade_type = self.current_upgrade_options[choice][0]
-                            self.upgrade_manager.apply_upgrade(self.player, upgrade_type)
-                            self.state = GameState.PLAYING
-                    elif self.state == GameState.GAME_OVER:
-                        if self.game_over_screen.handle_click(event.pos):
-                            self.reset_game()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.running = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        if self.state == GameState.UPGRADE:
+                            choice = self.upgrade_screen.handle_click(event.pos)
+                            if choice is not None:
+                                upgrade_type = self.current_upgrade_options[choice][0]
+                                self.upgrade_manager.apply_upgrade(self.player, upgrade_type)
+                                self.state = GameState.PLAYING
+                        elif self.state == GameState.GAME_OVER:
+                            if self.game_over_screen.handle_click(event.pos):
+                                self.reset_game()
 
     def shoot_laser(self):
         if self.player.can_shoot:
@@ -119,9 +136,14 @@ class Game:
             # Update enemy manager
             self.enemy_manager.update(self.player.x + self.player.size / 2,
                                       self.player.y + self.player.size / 2)
+
+            self.particle_system.update()
+
             # Update lasers
-            for laser in self.player.lasers[:]:  # Copy list for safe removal
+            for laser in self.player.lasers[:]:
                 laser.move()
+                if random.random() < 0.8:  # 80% chance to create trail particles
+                    self.particle_system.create_laser_trail(laser.x, laser.y)
                 if laser.is_off_screen():
                     self.player.lasers.remove(laser)
 
@@ -182,6 +204,8 @@ class Game:
                 self.score_manager.score,
                 self.score_manager.high_score
             )
+
+        self.particle_system.draw(self.screen)
 
         pygame.display.flip()
 
