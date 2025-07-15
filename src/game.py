@@ -13,6 +13,7 @@ from src.ui.hud import HUD
 from src.score_manager import ScoreManager
 from src.background import Background
 from src.ui.game_over_screen import GameOverScreen
+from ui.main_menu_screen import MenuScreen
 from ui.upgrade_screen import UpgradeScreen
 from upgrade_manager import UpgradeManager
 from src.particles import ParticleSystem
@@ -57,21 +58,29 @@ class Game:
         self.upgrade_screen = UpgradeScreen()
         self.current_upgrade_options = None
 
+
+
         self.particle_system = ParticleSystem()
         self.enemy_manager.particle_system = self.particle_system
+
+        self.menu_screen = MenuScreen()
+        self.state = GameState.MENU
 
         self.game_over_screen = GameOverScreen()
         self.reset_game()
 
     def reset_game(self):
-        self.state = GameState.PLAYING
+        self.state = GameState.MENU
         self.player = Player(WINDOW_W // 2 - PLAYER_SIZE // 2, WINDOW_H // 2 - PLAYER_SIZE // 2)
         self.enemy_manager = EnemyManager()
-        self.enemy_manager.particle_system = self.particle_system  # Add this line
+        self.enemy_manager.particle_system = self.particle_system
         self.score_manager.reset()
         self.upgrade_manager = UpgradeManager()
         self.current_upgrade_options = None
-        AssetLoader.play_music(volume=1.5)
+        # Play menu music
+        AssetLoader.stop_music()
+        AssetLoader.play_music(volume=1.0)
+
 
     def handle_events(self):
             for event in pygame.event.get():
@@ -80,6 +89,12 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.running = False
+                    elif event.key == pygame.K_SPACE and self.state == GameState.MENU:
+                        self.state = GameState.PLAYING
+                        # Stop menu music and start game music
+                        AssetLoader.stop_music()
+                        AssetLoader.load_music('neon_hyperdrive.mp3')
+                        AssetLoader.play_music(volume=1.0)
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         if self.state == GameState.UPGRADE:
@@ -174,48 +189,52 @@ class Game:
 
     def draw(self):
         self.screen.fill(BLACK)
-        self.background.draw(self.screen)
 
-        if self.state == GameState.PLAYING or self.state == GameState.UPGRADE:
-            # Draw game elements
-            self.player.draw(self.screen)
-            self.enemy_manager.draw(self.screen)
-            for laser in self.player.lasers:
-                laser.draw(self.screen)
+        if self.state == GameState.MENU:
+            self.menu_screen.draw(self.screen)
+        else:
+            self.background.draw(self.screen)
 
-            # Draw HUD
-            enemies_remaining = (self.enemy_manager.enemies_per_wave -
-                                 self.enemy_manager.enemies_spawned +
-                                 len(self.enemy_manager.enemies))
-            self.hud.draw(
-                self.screen,
-                self.score_manager.score,
-                self.enemy_manager.wave_number,
-                enemies_remaining
-            )
+            if self.state == GameState.PLAYING or self.state == GameState.UPGRADE:
+                # Draw game elements
+                self.player.draw(self.screen)
+                self.enemy_manager.draw(self.screen)
+                for laser in self.player.lasers:
+                    laser.draw(self.screen)
 
-            # Draw upgrade screen if in upgrade state
-            if self.state == GameState.UPGRADE:
-                self.upgrade_screen.draw(self.screen, self.current_upgrade_options)
+                # Draw HUD
+                enemies_remaining = (self.enemy_manager.enemies_per_wave -
+                                     self.enemy_manager.enemies_spawned +
+                                     len(self.enemy_manager.enemies))
+                self.hud.draw(
+                    self.screen,
+                    self.score_manager.score,
+                    self.enemy_manager.wave_number,
+                    enemies_remaining
+                )
 
-        elif self.state == GameState.GAME_OVER:
-            self.game_over_screen.draw(
-                self.screen,
-                self.score_manager.score,
-                self.score_manager.high_score
-            )
+                # Draw upgrade screen if in upgrade state
+                if self.state == GameState.UPGRADE:
+                    self.upgrade_screen.draw(self.screen, self.current_upgrade_options)
 
-        self.particle_system.draw(self.screen)
+            elif self.state == GameState.GAME_OVER:
+                self.game_over_screen.draw(
+                    self.screen,
+                    self.score_manager.score,
+                    self.score_manager.high_score
+                )
+
+            self.particle_system.draw(self.screen)
 
         pygame.display.flip()
 
     def run(self):
-        while self.running:
-            self.handle_events()
-            self.update()
-            self.draw()
-            self.clock.tick(FPS)
+            while self.running:
+                self.handle_events()
+                self.update()
+                self.draw()
+                self.clock.tick(FPS)
 
-        AssetLoader.stop_music()
-        pygame.quit()
+            AssetLoader.stop_music()
+            pygame.quit()
 

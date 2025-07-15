@@ -14,9 +14,9 @@ RED = (255, 0, 0)
 PLAYER_SIZE = 35
 PLAYER_SPEED = 5
 PLAYER_COLOR = WHITE # used for debugging and proto
-AIM_SPEED = 0.5
+AIM_SPEED = 1.2
 
-FIRE_RATE = 20
+FIRE_RATE = 25
 
 # game
 MENU = "MENU"
